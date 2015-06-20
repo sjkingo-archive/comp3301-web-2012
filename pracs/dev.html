@@ -1,0 +1,103 @@
+<html>
+<head>
+    <title>COMP3301/7308 Setting up a development environment</title>
+    <style type="text/css">
+        @import url('../_css/override.css');
+        @import url('../_css/navbar.css');
+    </style>
+</head>
+
+<body>
+    <h2>Setting up a development environment</h2>
+
+    <p>This guide will help you get set up using the COMP3301 virtual image
+    inside VMware Player, which you will use for assignments 2 and 3 and their
+    associated practicals.</p>
+
+    <hr />
+
+    <h3>Set up the basic image</h3>
+
+    <p>First, you must download the image off the EAIT labs network. There are
+    two ways to do this, as shown on the <a href="../resources/">Resources
+        page</a> (if you are on your own computer, you must use SCP to copy
+    it). Download and extract it to a USB HDD or your own computer - do not put
+    it on your student drive or the local labs computers!</p>
+
+    <p>If you are on your own computer, you must now install VMware Player (if
+    you don't already have it). Again, follow the instructions on the <a
+        href="../resources/">Resources page</a>. If you are using the EAIT labs
+    computers, they already have it installed.</p>
+
+    <p>Once installed, open VMware Player and browse for the
+    <tt>COMP3301-VM.vmx</tt> file to add the existing machine and start it.
+    Once the machine has started, you can log in to the machine using the
+    username and password <tt>comp3301</tt>.</p>
+
+    <hr />
+
+    <p><strong>Please note</strong> that marking of assignments 2 and 3 will take place
+    on a clean image that is provided on the course website, so we highly
+    recommend you <strong>do not update</strong> any packages or the kernel on
+    your development machine! Do so at your own risk!</p>
+
+    <hr />
+
+    <h3>Virtual machine networking</h3>
+
+    <p>You may notice that networking does not initially work in the virtual
+    machine. Try and look around the system and find out why this is the case.
+    Hint: try using tools such as <tt>ping</tt>, <tt>ifconfig</tt>, etc. Once
+    you have figured out what the problem is, follow the instructions on the <a
+        href="../resources/">Resources page</a> to fix this.</p>
+
+    <hr />
+
+    <h3>Subversion checkout</h3>
+
+    <p>Before starting on any assignments, it is recommended you checkout and set up your Subversion
+    repository. A <a href="subversion.html">Subversion cheat sheet</a> is available for your reference.</p>
+
+    <p>Check out a working copy of your repository and create a tracked directory <tt>test</tt>. In it,
+    create a simple <tt>Hello, world</tt> program with a <tt>Makefile</tt> that will build it. Confirm
+    that it compiles and runs with no warnings or errors (you should always compile with the <tt>-Wall</tt>
+    compile flag to <tt>gcc</tt>). Make sure you commit any <tt>.c</tt> files and your <tt>Makefile</tt>
+    to the test directory.</p>
+
+    <p>Try checking out a fresh copy of your repository in another directory and 
+    confirm your test program still works. If it doesn't, maybe you forgot to commit part of your source?</pp>
+
+    <p>Now, create a tracked directory called <tt>a0</tt> in the root of your
+    repository. This is where you will keep your assignment 0 source code
+    files.  Try checking out the directory specified in the assignment 0
+    specification (substituting your own student number) to make sure you've
+    placed the <tt>a0</tt> subdirectory in the correct location. You may lose
+    marks on assignments if you don't use the expected directory structure.</p>
+
+    <hr />
+
+    <h3>SSH access to the virtual machine</h3>
+
+    <p>You've probably noticed how cumbersome it is to do development directly in the virtual machine
+    console in VMware player. We recommend you SSH in to your virtual machine from the host using 
+    <a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/">PuTTY</a> (on Windows) or <tt>ssh(1)</tt> (on Linux/Mac). You should be familiar with using SSH from previous courses. Find out the IP address of
+    the virtual machine (hint: the interface should be called <tt>eth0</tt>) and try and connect to it
+    from your host machine.</p>
+
+    <hr />
+
+    <h3>Recommended editors</h3>
+
+    <p>We highly recommend using a Unix editor such as <tt>vim</tt> to develop
+    your assignments. It can be set up with syntax highlighting and
+    auto-indenting to make following the style guide trivial. Try setting up a
+    basic <tt>.vimrc</tt> that switches syntax highlighting and auto-indenting
+    on.</p>
+
+    <p>Please do not check in any code with Windows line endings, it makes our
+    jobs as markers more difficult as we have to convert your code to Unix line
+    feeds before we can look at your code! Think of the people who are awarding
+    you marks before using a Windows editor!</p>
+
+</body>
+</html>

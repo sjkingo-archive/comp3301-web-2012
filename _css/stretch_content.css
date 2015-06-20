@@ -1,0 +1,9 @@
+/* this hack stretches the central content area out for more horizontal space, while preserving the space
+ * required for the side nav - good for wide tables
+ */
+#wrapper {
+    width: 100% !important;
+}
+#content, #content-primary {
+    width: 75% !important;
+}

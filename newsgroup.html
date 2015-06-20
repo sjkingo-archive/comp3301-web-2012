@@ -1,0 +1,41 @@
+<html>
+<head>
+    <title>Newsgroup access</title>
+    <style type="text/css">
+        @import url('_css/override.css');
+        @import url('_css/navbar.css');
+    </style>
+</head>
+
+<body>
+    <h2>Newsgroup access</h2>
+    <p>The course newsgroup can be found at <em>uq.itee.comp3301</em> (we use the same newsgroup for the
+    shadow course too). There are two methods of accessing the newsgroup:</p>
+    <ul>
+        <li>Through <a href="http://my.uq.edu.au/">my.UQ</a> myNewsgroups (note: no threading is available)</li>
+        <li>In your own client through <tt>sslnews</tt></li>
+    </ul>
+
+    <p>If you have a newsreader on your machine (Thunderbird, mutt, pan, ...) you can use <tt>sslnews</tt> to access the EAIT newsgroups.</p>
+
+    <h3>Configuration for <tt>sslnews</tt> access</h3>
+    <p>
+        <strong>Server:</strong> <tt>sslnews.eait.uq.edu.au</tt><br />
+        <strong>Port:</strong> 563<br />
+        <strong>SSL/TLS:</strong> Enabled<br />
+        <strong>Username and Password:</strong> ITEE login (sXXXXXXX)
+    </p>
+    <p><em>Thunderbird note: you must select &ldquo;Always request authentication when connecting to this server&rdquo;</em></p>
+
+    <h3>Using a non SSL-enabled newsreader</h3>
+    <p>Some newsreaders do not support SSL access, so to connect to the EAIT newsgroups you must use <a href="http://www.stunnel.org/index.html">stunnel</a>. A sample config is provided to you below, but no further support with be given if you have to use this method.</p>
+    <tt>/etc/stunnel/stunnel.conf</tt>:<br />
+    <pre><code>    client = yes
+    [sslnews]
+    accept = localhost:119
+    connect = sslnews.eait.uq.edu.au:563
+    </code></pre>
+
+    <p>More detailed information on EAIT's newsgroup access can be found <a href="http://student.eait.uq.edu.au/infrastructure/newsgroups.html">here</a>.</p>
+</body>
+</html>

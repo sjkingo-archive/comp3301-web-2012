@@ -1,0 +1,49 @@
+--- ioctl.h	2012-08-28 09:47:57.000000000 +1000
++++ ioctl-1.1.h	2012-09-19 08:32:32.304018519 +1000
+@@ -3,11 +3,14 @@
+ 
+ /* ioctl.h for COMP3301 A2.
+  * Written by Sam Kingston, 2010-2012.
+- * Version 2012/1.0
++ * Version 2012/1.1 (2012-09-19 08:24)
+  *
+  * Please do not modify this file as any changes will be disgarded during marking.
+  */
+ 
++#include <linux/types.h>
++typedef __u8 u8;
++
+ enum crypto_direction {
+     CRYPTO_READ,
+     CRYPTO_WRITE
+@@ -39,6 +42,7 @@
+  *
+  * Returns one of:
+  *     >0 on success (buffer id)
++ *     -EOPNOTSUPP if the fd is already attached to a buffer
+  *     -ENOMEM if no memory was available to satisfy the request
+  */
+ #define CRYPTO_IOCCREATE _IO(CRYPTO_MAGIC, 1)
+@@ -105,10 +109,11 @@
+  * Example to set the device to decrypt on read (where fd is an open file 
+  * descriptor to the device):
+  *
++ *     u8 *key = "this is a key";
+  *     struct crypto_smode m;
+  *     m.dir = CRYPTO_READ;
+  *     m.mode = CRYPTO_DEC;
+- *     m.key = 0x5;
++ *     m.key = key;
+  *
+  *     int r = ioctl(fd, CRYPTO_IOCSMODE, &m);
+  *
+@@ -119,7 +124,8 @@
+  *     0 on success
+  *     -ENOMEM if no memory was available to satisfy the request
+  *     -EFAULT if the pointer given is outside the address space of the
+- *              user process
++ *              user process, or the key cannot be copied to the kernel's
++ *              address space
+  */
+ #define CRYPTO_IOCSMODE _IOW(CRYPTO_MAGIC, 5, struct crypto_smode *)
+ 

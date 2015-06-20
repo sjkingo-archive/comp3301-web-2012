@@ -1,0 +1,13 @@
+/* grey text is annoying */
+ul, li {
+    color: black !important;
+}
+
+#content-primary ul {
+    margin: 0 0 10px 10px !important;
+}
+
+span.updated {
+    font-weight: bold;
+    color: red;
+}

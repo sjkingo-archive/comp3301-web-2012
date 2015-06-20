@@ -1,0 +1,9 @@
+{
+    "links": [
+        {
+            "name": "Back to home",
+            "href": "../",
+            "priority": 0
+        }
+    ]
+}

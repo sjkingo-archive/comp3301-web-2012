@@ -1,0 +1,112 @@
+<html>
+<head>
+    <title>COMP3301/7308 Character device driver</title>
+    <style type="text/css">
+        @import url('../_css/override.css');
+        @import url('../_css/navbar.css');
+    </style>
+</head>
+
+<body>
+    <h2>Character device driver</h2>
+
+    <p>The goal of this practical is for you to write a simple character device
+    driver as a kernel module. You will be using <a
+        href="http://lwn.net/images/pdf/LDD3/ch03.pdf">chapter 3 of LDD3</a>
+    (Linux Device Drivers, 3rd edition - see the <a
+        href="../resources/#a23">Resources page</a>) as reference. You may also
+    need to find some references online to complete some of the functionality -
+    a Google search for <a
+        href="http://www.google.com.au/search?q=%22linux%20character%20device%20driver%22">"linux
+        character device driver"</a> is a good starting point.</p>
+
+    <p>You will need the module developed in the <a href="hello-kernel-world.html">previous practical</a>.</p>
+
+    <p><strong>Please note</strong> it is <em>strongly recommended</em> that you do all kernel development
+    on the virtual image (we recommend ssh'ing in using <tt>ssh(1)</tt> or Putty on Windows) as it
+    is very easy to crash the kernel you are working on while doing development. It is possible you
+    may lose data if you work on a physical Linux machine and crash its kernel.</p>
+
+    <hr />
+    <h3>Task: Complete the basic driver</h3>
+
+    <p><em>Before attempting to implement this prac, you should skim through
+        chapter 3 of LDD3 book as stated above.</em></p>
+
+    <p>The character driver you are writing should buffer any data written to
+    it, allowing the same data to be read out. The following
+    assumptions/restrictions apply:</p>
+
+    <ul>
+            <li>The device should store a character buffer of 4K (4096 bytes) in size.</li>
+            <li>The buffer maintains a read and a write pointer (a simple offset/array index would suffice).</li>
+            <li>When the write pointer exceeds the size of the buffer, all subsequent writes should fail with <tt>-EINVAL.</tt></li>
+            <li>When the read pointer exceeds the size of the buffer, all subequent reads should fail with <tt>-EINVAL</tt>.</li>
+            <li>If there is no data to return (for instance a <tt>read()</tt> before a <tt>write()</tt>), the device should return 0 (signifying no data).</li>
+    </ul>
+
+    <p>You will need to implement the functions given in the .c file given below, using
+    the LDD3 book for reference. Note that before you can build your device, you
+    will need to intergrate it with the module you created in the last practical.</p>
+
+    <ul>
+            <li><a href="../resources/files/prac-fops.c">prac-fops.c</a></li>
+            <li><a href="../resources/files/prac-fops.h">prac-fops.h</a> (<tt>#include</tt> this from your module)</li>
+    </ul>
+
+    <p>The following memory allocation functions may be useful to you:</p>
+
+    <ul>
+            <li><tt>kmalloc(SIZE, GFP_KERNEL);</tt> (where SIZE is the number of bytes you wish to allocate)</li>
+            <li><tt>kfree(ptr);</tt></li>
+    </ul>
+
+    <p>Add a <tt>printk()</tt> call to the <tt>device_open()</tt> function so your module prints something out
+    every time it is opened.</p>
+
+    <p>Either merge the .c file from the last practical with this one, or see if you can find a way to build a kernel
+    module from multiple source files.</p>
+
+    <hr />
+    <h3>Using the device</h3>
+
+    <p>To use the device, you first need to register it. To do this, you must print
+    out the major and minor numbers that the module is assigned using
+    <tt>printk()</tt>. This way, when you load the module, you are able to see the
+    identifier the kernel has assigned the module. Once you know these numbers,
+    type the following:</p>
+
+    <p><pre>mknod device c MAJOR MINOR</pre></p>
+
+    <p>(where MAJOR and MINOR are the major and minor numbers you found out before). This creates a
+    block device on the file system (called <tt>device</tt>) that looks like a file. You can now use
+    this to access the device.</p>
+
+    <p>Try running <tt>cat device</tt> and noting the output (if any). What is the return status? What happened? Check <tt>dmesg</tt>
+    to see if the <tt>printk()</tt> you added is printed.</p>
+
+    <hr />
+    <h3>Task: Test program</h3>
+
+    <p>Now write a userspace test program (in C) that performs the following functions:</p>
+
+    <ul>
+            <li>Opens the device driver for reading and writing</li>
+            <li>Writes some ASCII data to the device (for instance "hello there!")</li>
+            <li>Read back 100 bytes and confirm that the data is the same as when written</li>
+            <li>Close the device</li>
+    </ul>
+
+    <p>After running the test program, try to unload the kernel module. Does it work?</p>
+
+    <hr />
+
+    <p>Don't throw away the code you have written in this prac - it will form a basis for assignment 2.</p>
+
+    <h3>Next steps</h3>
+    <p>It is recommended you read the LDD3 chapters that are linked on the <a
+        href="../resources/#a23">Resources page</a>, as they will be invaluable
+    for completing assignments 2 and 3.</p>
+</body>
+
+</html>

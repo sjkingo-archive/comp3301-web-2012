@@ -1,0 +1,235 @@
+<html>
+<head>
+    <title>COMP3301/7308 Introduction to Pth</title>
+    <style type="text/css">
+        @import url('../_css/override.css');
+        @import url('../_css/navbar.css');
+    </style>
+</head>
+
+<body>
+    <h2>Introduction to Pth</h2>
+
+    <p>The goal of this practical is to introduce you to Pth, the GNU Portable 
+    threading library. It will walk you through how to use the library, including
+    building it and creating a test program that links against it.</p>
+
+    <p><strong>Contents</strong></p>
+
+    <ul>
+        <li><a href="#whatis">What is Pth?</a></li>
+        <li><a href="#building">Building Pth</a></li>
+        <li><a href="#test-program">A simple test program</a></li>
+        <li class="hide"><ul>
+            <li><a href="#test-program-func">The thread function</a></li>
+        </ul></li>
+        <li><a href="#linking-running">Linking and running the test program</a></li>
+        <li class="hide"><ul>
+            <li><a href="#linking-running-debug">Debugging output</a></li>
+        </ul></li>
+        <li><a href="#exploring">Exploring Pth</a></li>
+        <li class="hide"><ul>
+            <li><a href="#exploring-pth-vs-pthreads">Pth vs Pthreads</a></li>
+            <li><a href="#exploring-signals">Signals</a></li>
+        </ul></li>
+    </ul>
+
+    <hr />
+
+    <h2 id="whatis">What is Pth?</h2>
+
+    <p>Pth is the GNU Portable Threads library, a C library that provides multithreading
+    capabilities to user-space processes. It is similar to pthreads (which you
+    should be familiar with from CSSE2310), except it operates completely in
+    user-space &mdash; the kernel is not aware of the multiple threads of
+    execution inside the user-space process.</p>
+
+    <p>With Pth, multiple threads of execution can exist inside one process. The kernel
+    only &lsquo;sees&rsquo; this single process, and as such will schedule it as normal.
+    When the process is given a scheduling slice by the kernel, one of the Pth threads
+    that exist in the process will be run.</p>
+
+    <p>The original Pth library implements cooperative multithreading, but we
+    have patched it to replace this with a preemptive scheduler. All of your
+    work on the Pth library will be with this version, including assignment
+    1.</p>
+
+    <p>It is <em>highly recommended</em> that you read the manual page for Pth
+    before using it, as it contains detailed information on the library and its
+    behaviour, which will be an invaluable resource to you. You will find the
+    <a href="http://linux.die.net/man/3/pth">Pth manual page here</a>.</p>
+
+    <hr />
+
+    <h2 id="building">Building Pth</h2>
+
+    <p>For this course we will be using version 2.0.7-preempt of Pth.</p>
+
+    <ol>
+        <li>Download Pth from <a href="../resources/files/pth-2.0.7-preempt.tar.gz">the course website</a></li>
+        <li>Download the <a href="../resources/files/build-pth.sh">build script</a></li>
+        <li>Make the script executable with <tt>chmod +x build-pth.sh</tt></li>
+        <li>Run <tt>./build-pth.sh --help</tt> for instructions</li>
+    </ol>
+
+    <p>Running <tt>./build-pth.sh --help</tt> should show you that you will need to
+    run it with the <tt>--extract</tt> argument for the first time, to ensure the
+    source tree is extracted, once this is done once you should not need to use
+    <tt>--extract</tt> again.</p>
+
+    <p><em>Run the build script now, and take note of how long it takes to build. Now,
+        run it again see how long it takes. Why do you think there is such a difference?</em></p>
+
+    <p>The bottom of the build script's output shows you the libraries that
+    have been installed.  You should see two: one with a <tt>.a</tt> extension,
+    and one with a <tt>.so</tt> extension.  <tt>.a</tt> is a
+    statically-linkable library, that can be linked into a program at
+    compile-time.</p> The <tt>.so</tt> file is a dynamic library, which allows
+    a program to link against the library at runtime.</p>
+
+    <p>You will end up using both types of libraries during your Pth development time (but not in this prac).</p>
+
+    <hr />
+
+    <h2 id="test-program">A simple test program</h2>
+
+    <p>We call into the Pth library in much the same way as any other C
+    library, but there is one important distinction: we must ensure we
+    don't make any system calls that block.  Pth schedules threads entirely in
+    user-space, without any help from the kernel, which means that the kernel
+    has no way to know that there are other threads in our process which might
+    be ready to run while we wait for our blocking system call to return.
+    Instead the kernel will block <em>all</em> threads in our process, causing
+    starvation.</p>
+
+    <p>Pth provides wrappers around most of the blocking system calls, and you must call
+    these instead. They are prefixed with <tt>pth_</tt> (for example, <tt>pth_sleep()</tt>.)
+    These wrappers dispatch to a non-blocking version of the required system call and notify
+    the calling thread once it is complete. This allows other threads to run in the meantime.
+    </p>
+
+    <p><strong>Question:</strong> <em>Does thread-safety matter when running threads in Pth? Why or why
+        not? Have a read of the manual page for</em> <tt>ctime(3)</tt> <em>for some tips
+        (especially the</em> <tt>NOTES</tt> <em>section).</em></p>
+
+    <p>We start off with our <tt>main()</tt> function:</p>
+        
+<pre>
+int main(void)
+{
+    /* must be called first: sets up system threads and turns us into the
+     * main control thread
+     */
+    pth_init();
+
+    /* spawn some new threads */
+    for (int i = 0; i &lt; 5; i++) {
+        pth_spawn(PTH_ATTR_DEFAULT, thread_func, NULL);
+    }
+
+    /* sleep the main thread for 15 seconds... this allows the other threads
+     * to continue running
+     */
+    pth_sleep(15);
+}
+</pre>
+
+    <p>As you can see, we&rsquo;ve left out the <tt>thread_func</tt> function: this is
+    a task for you to create (see the next section).</p>
+
+    <p>The main function above introduces you to a few of the function calls that
+    exist in the Pth library:</p>
+
+    <ul>
+        <li><tt>pth_init()</tt> &mdash; initialises the library and sets up the
+        process ready for threading</li>
+        <li><tt>pth_spawn()</tt> &mdash; similar to <tt>pthread_create()</tt>, this
+        function is used to create a new thread that will be run</li>
+        <li><tt>pth_sleep()</tt> &mdash; the Pth-safe version of <tt>sleep()</tt></li>
+    </ul>
+
+    <p><strong>Question:</strong> <em>What does the</em>
+    <tt>PTH_ATTR_DEFAULT</tt> <em>definition mean when given as the first
+        argument? What would you call if you wanted a non-default
+        attribute?</em></p>
+
+    <h3 id="test-program-func">The thread function</h3>
+
+    <p>Your task is to write the <tt>thread_func</tt> function which will have
+    the following prototype:</p>
+
+    <pre>static void *thread_func(void *arg)</pre>
+
+    <p>(the <tt>arg</tt> argument is unused in this example). Each thread
+    should <a href="http://en.wikipedia.org/wiki/Busy_waiting">busy-wait</a>
+    for 1 second, print out "yielding now", and then yield (see the <tt>pth_yield()</tt> function). This
+    process should be repeated five times, after which the thread should exit.
+    The <tt>time(2)</tt> system call would be useful for this.</p>
+
+    <p>Observe the behaviour of the test program with <tt>top(1)</tt> and
+    <tt>ps(1)</tt> (to get <tt>top</tt> to display individual threads, type
+    <tt>H</tt> in <tt>top</tt>). Think about how many processes are running,
+    how long they run for, how the threads behave, etc.</p>
+
+    <hr />
+
+    <h2 id="linking-running">Linking and running the test program</h2>
+
+    <p>Some extra compile and linker flags need to be provided when compiling
+    and linking the test program (and any program that uses Pth). You can download
+    a <a href="../resources/files/pth-Makefile">sample Makefile here</a> (make sure you
+    rename it to <tt>Makefile</tt>).</p>
+
+    <p>For example, the extra flags that need to be given are:</p>
+<pre>
+PTH_CONFIG=pth-2.0.7-preempt/pth-config
+
+CC=gcc
+CFLAGS=-Wall -Wextra -g -std=gnu99 $(shell $(PTH_CONFIG) --cflags)
+LDFLAGS=$(shell $(PTH_CONFIG) --ldflags) -Wl,-rpath,$(shell $(PTH_CONFIG) --libdir)
+LIBS=$(shell $(PTH_CONFIG) --libs)
+</pre>
+
+    <p>where <tt>PTH_CONFIG</tt> is the path to the <tt>pth-config</tt> program.</p>
+
+    <p><strong>Question:</strong> <em>What does the</em> <tt>-Wl,-rpath,...</tt> <em>
+    argument to the linker do?</em></p>
+
+    <h3 id="linking-running-debug">Debugging output</h3>
+
+    <p>Pth allows debugging output to be printed to the terminal while a program linked
+    against it is running. This is very useful and is an invaluable resource during
+    testing, to see what the Pth library is doing.</p>
+
+    <p>Enabling this debugging output requires rebuilding the Pth source with
+    debugging enabled, which can be achieved by running the
+    <tt>build-pth.sh</tt> shell script with the <tt>--debug</tt> argument.
+
+    <hr />
+
+    <h2 id="exploring">Exploring Pth</h2>
+
+    <p>Write a test program that spawns some &lsquo;greedy&rsquo; threads
+    &mdash; threads that consume a lot of CPU time without yielding &mdash; 
+    and one or two &lsquo;lean&rsquo; threads that yield often. Observe the output
+    of the Pth debugging and try to get a feel for how long each thread is spending
+    executing before yielding.</p>
+
+    <h3 id="exploring-pth-vs-pthreads">Pth vs Pthreads</h3>
+
+    <p>You should see by now that there are limitations of running a threading
+    library in user-space without kernel support. Recreate the test program
+    created above but this time use Pthreads. Remember that since Pthreads has
+    kernel support, threads may call blocking system calls.
+    Run them both at once and compare the differences in behaviour in
+    <tt>top(1)</tt> and <tt>ps(1)</tt>. How many processes does the Pthreads
+    version use?  What is the CPU usage like?</p>
+
+    <h3 id="exploring-signals">Signals</h3>
+
+    <p>What happens when you send a signal to an individual thread, running
+    with pthreads? Try <tt>kill -SIGHUP pid</tt> (where <tt>pid</tt> is one of
+    the running thread&rsquo;s process id&rsquo;s). Did you expect this
+    behaviour? Now try again with Pth.</p>
+</body>
+</html>

@@ -1,0 +1,110 @@
+<html>
+<head>
+    <title>COMP3301/7308 Pth internals</title>
+    <style type="text/css">
+        @import url('../_css/override.css');
+        @import url('../_css/navbar.css');
+    </style>
+</head>
+
+<body>
+    <h2>Pth internals</h2>
+
+    <p>The goal of this practical is to give you hand&rsquo;s-on experience 
+    modifying the Pth library internals. You will need this knowledge for
+    assignment 1. You should not attempt this prac until you have completed
+    the previous prac, <a href="intro-pth.html">Intro to Pth</a>.</p>
+
+    <p><strong>Contents</strong></p>
+
+    <ul>
+        <li><a href="#useful-source-files">Useful source files</a></li>
+        <li><a href="#struct_pth_st"><tt>struct pth_st</tt></a></li>
+        <li><a href="#debugging-calls">Making debugging calls</a></li>
+        <li><a href="#pth-scheduler">The Pth scheduler</a></li>
+    </ul>
+
+    <hr />
+
+    <h2 id="useful-source-files">Useful source files</h2>
+
+    <ul>
+        <li><em>pth_tcb.c</em> - definition of <tt>struct pth_st</tt></li>
+        <li><em>pth_lib.c</em> - home of <tt>pth_spawn()</tt>, which is called to create a new thread</li>
+        <li><em>pth_sched.c</em> - Pth scheduler, the &ldquo;heart&rdquo; of Pth</li>
+        <li><em>pth_pqueue.c</em> - priority queue implementation, used by the scheduler for its thread queues</li>
+    </ul>
+
+    <h2 id="struct_pth_st"><tt>struct pth_st</tt></h2>
+
+    <p>The <tt>pth_st</tt> structure stores all of the information on threads. Each thread has exactly
+    one such structure assigned to it. After building the source, you will see the structure in 
+    <em>pth_p.h</em>. Add an integer member to the structure (such as <tt>int foo;</tt>) and perform the following steps:</p>
+
+    <ol>
+        <li><tt>make clean</tt></li>
+        <li><tt>make</tt></li>
+    </ol>
+
+    <p>Now have a look back in <em>pth_p.h</em>. Where did <tt>foo</tt> go? The problem here is that the
+    Pth source auto-generates the header file off another file - <em>pth_tcb.c</em>. If you wish to
+    modify the structure, you must make the changes in the thread control block file. Try adding the
+    <tt>foo</tt> variable into the <tt>.c</tt> file specified and rebuild the source. You should now
+    see that it is always populated in the header file.</p>
+
+    <p><strong>Question:</strong> <em>Where can you initialise members of the thread control block structure? Initialise your integer value to 5.</em></p>
+
+    <hr />
+
+    <h2 id="debugging-calls">Making debugging calls</h2>
+
+    <p>Recall from the previous prac that building the Pth library with debugging enabled produces
+    a fair amount of output on what the library is doing, and its internal state. This is very
+    useful during development and you too can output messages of your own. To write debugging
+    output to the screen, there are a number of <tt>printf()</tt>-style functions to help you,
+    named <tt>pth_debug1()</tt> through to <tt>pth_debug6()</tt>. You can use them as follows:</p>
+
+    <ul>
+        <li><tt>pth_debug1(string)</tt> - simple string with no formatting</li>
+        <li><tt>pth_debug2(format, arg1)</tt> - format string with one argument</li>
+        <li><tt>pth_debug3(format, arg1, arg2)</tt> - format string with two argument</li>
+        <li><em>etc.</em></li>
+    </ul>
+
+    <p>For instance, to print out a single argument you would use:</p>
+
+    <p><pre>char *str = "hello";
+    pth_debug2("Value is: %s", str);</pre></p>
+
+    <p>Let's say we wanted to print out some information when a thread is created. Find the <tt>pth_spawn()</tt>
+    function and just before it returns, print (using debugging) the following members of the thread's control block:
+
+    <ul>
+        <li>Its name</li>
+        <li>Its priority</li>
+        <li>The value of the <tt>foo</tt> member you added</li>
+    </ul>
+
+    <p><strong>Question:</strong> <em>Which</em> <tt>pth_debug</tt> <em>function do you need to use for the above?</em></p>
+
+    <p>Rebuild the source and use a test program to create a new thread. You should be able to see the output of your
+    debugging print when the program is run (hint: try <tt>grep</tt>ping the output for it).</p>
+
+    <hr />
+
+    <h2 id="pth-scheduler">The Pth scheduler</h2>
+
+    <p>The scheduler is responsible for coordinating and controlling which threads
+    run next, and for dispatching signals and events to waiting threads. Threads
+    will run for 100 ms at which time they will be preempted if they haven't
+    already yielded.</p>
+
+    <p>Pth's scheduler is mostly implemented in the <em>pth_sched.c</em> file. By looking through this file you should see that it is responsible for
+    picking new threads to run, and performing general housekeeping (such as moving threads between
+    priority queues, dispatching any signals, checking for stack overflows, <em>etc.</em>).</p>
+
+    <p>Create some simple threads that loop forever and others than yield after
+    doing some work. Examine the behaviour of the scheduler and determine what type
+    of scheduling algorithm it implements. Does it pick threads fairly?</p>
+</body>
+</html>

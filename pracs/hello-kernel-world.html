@@ -1,0 +1,245 @@
+<html>
+<head>
+    <title>COMP3301/7308 Hello Kernel World - Introduction to kernel modules</title>
+    <style type="text/css">
+        @import url('../_css/override.css');
+        @import url('../_css/navbar.css');
+    </style>
+</head>
+
+<body>
+    <h2>Hello Kernel World - Introduction to kernel modules</h2>
+
+    <p>The goal of this practical is a simple hello world &lsquo;program&rsquo; &mdash;
+    running in kernel-space. To do this, we will introduce you to kernel modules,
+    which you will be using to write your solutions for the following assignments with.
+    </p>
+
+    <p><strong>Please note</strong> it is <em>strongly recommended</em> that you do all kernel development
+    on the virtual image (we recommend ssh'ing in using <tt>ssh(1)</tt> or Putty on Windows) as it
+    is very easy to crash the kernel you are working on while doing development. It is possible you
+    may lose data if you work on a physical Linux machine and crash its kernel.</p>
+
+    <p><strong>Contents</strong></p>
+
+    <ul>
+        <li><a href="#whatis">What is a kernel module</a></li>
+        <li><a href="#anatomy">Anatomy of a kernel module</a></li>
+        <li class="hide"><ul>
+            <li><a href="#anatomy-init">init function</a></li>
+            <li><a href="#anatomy-dmesg">dmesg</a></li>
+            <li><a href="#anatomy-cleanup">cleanup function</a></li>
+            <li><a href="#anatomy-metadata">Module metadata</a></li>
+            <li><a href="#anatomy-includes">Includes</a></li>
+        </ul></li>
+        <li><a href="#building">Building a kernel module</a></li>
+        <li><a href="#running">Loading and unloading</a></li>
+        <li class="hide"><ul>
+            <li><a href="#running-loading">Loading &mdash; <tt>insmod</tt></a></li>
+            <li><a href="#running-listing">Listing &mdash; <tt>lsmod</tt></a></li>
+            <li><a href="#running-unloading">Unloading &mdash; <tt>rmmod</tt></a></li>
+        </ul></li>
+    </ul>
+
+    <hr />
+    <h2 id="whatis">What is a kernel module</h2>
+
+    <p>A kernel module allows us to load new features into a running Linux kernel without
+    rebuilding its entire source or rebooting the machine. This is a very useful feature
+    for many reasons, but the one we are most concerned with is that it makes development
+    much more efficient. Instead of rebuilding the Linux source tree on every modification
+    (which can take anywhere from 5 minutes to 1 hour), we keep our code for the module
+    outside of the kernel source tree.</p>
+
+    <p>Not everything can be done outside of the kernel source tree. For instance
+    modifying the scheduler requires you to modify the core of the kernel &mdash; modifications
+    in this fashion cannot be loaded in at runtime. Device drivers and file systems are
+    two types of modules that can be loaded with ease.</p>
+
+    <p><strong>Question:</strong> <em>why do you think the scheduler must be
+    built into the kernel instead of being loaded as a module?</em></p>
+
+    <p>More information on the concept of kernel modules can be found on <a
+        href="http://en.wikipedia.org/wiki/Loadable_kernel_module">Wikipedia</a>.</p>
+
+    <hr />
+    <h2 id="anatomy">Anatomy of a kernel module</h2>
+
+    <p>At a bare minimum a kernel module requires two callback functions: the
+    initialiser (which is called when the kernel loads the module), and a
+    cleanup function (which is called when the kernel unloads the module).
+    These functions are comparible in concept to class constructors and
+    deconstructors in object-oriented programming languages.</p>
+
+    <h3 id="anatomy-init">init function</h3>
+
+    <p>The initialiser function (a common shorthand for this is the <em>init
+        function</em>) takes no arguments and returns an integer. This return
+    code is used to determine whether the kernel should continue loading the
+    module. If the return evaluates to greater than 0, then the kernel will
+    unload the module.</p>
+
+    <pre>
+    int __init init_module(void)
+    {
+        printk(KERN_INFO "Hello, kernel world!\n");
+        return 0;
+    }
+    </pre>
+
+    <p>Convention dictates that the function is named <tt>init_module</tt> so the
+    kernel can recognise this is the function that should be called when the module
+    is loaded. You will note the <tt>__init</tt> symbol between the return type and
+    the function name. This is a bit different to normal C programs, but is a
+    common thing in the world of kernel development. <tt>__init</tt> is a
+    preprocessor definition that instructs the kernel to discard the memory used by
+    the function after it returns (since it will only be called once over a
+    module&rsquo;s lifetime).</p>
+
+    <p>Inside the function, there is a call to a function that you may not have
+    seen before &mdash; <tt>printk()</tt>. This is the kernel&rsquo;s version of
+    <tt>printf()</tt> and allows us to talk to the outside world. The arguments
+    are the same as the standard <tt>printf()</tt> call, except we prefix the 
+    format string with a logging level. In the case of our example, we used
+    <tt>KERN_INFO</tt>. This is a preprocessor definition that will expand out
+    to a prefix string that, due to the way C handles consecutive string constants,
+    will concatenate together (note that there is no comma between the prefix and
+    the format string).</p>
+
+    <p>We will talk about where the output from this call goes later on.</p>
+
+    <p>And that&rsquo;s it for out init function. When loaded, the kernel will
+    execute the <tt>init_module()</tt> function and something will be printed
+    &mdash; but where will this output go?</p>
+
+    <p>In a standard C program that is run from a terminal, the output from
+    <tt>printf()</tt> is directed to the terminal and appears on the screen
+    (unless redirected to a file). But in the kernel, where does this output
+    go? The answer is dmesg.</p>
+
+    <h3 id="anatomy-dmesg">dmesg</h3>
+
+    <p>dmesg is used to print the contents of the kernel's buffer. This is where the
+    output of <tt>printk()</tt> goes. Find the last couple of messages that the kernel
+    has printed by typing <tt>dmesg | tail</tt> into a terminal.</p>
+
+    <h3 id="anatomy-cleanup">cleanup function</h3>
+
+    <p>We have already created the init function for our module, but now we need
+    to write a cleanup function that will be called when the module is unloaded.
+    It gives us one final chance to clean up and free any memory before the module
+    is removed from the kernel.</p>
+
+    <pre>
+    void __exit cleanup_module(void)
+    {
+        printk(KERN_INFO "Goodbye, kernel world!\n");
+    }
+    </pre>
+
+    <p>In our simple cleanup function, we simply print out that the module is being
+    unloaded. This output will go to dmesg as described above.</p>
+
+    <h3 id="anatomy-metadata">Module metadata</h3>
+
+    <p>Each module has some metadata attached to it, such as its author and
+    description, but more importantly, the license it is released under. We have to
+    declare this otherwise the module will <em>taint</em> the kernel - meaning
+    there is a module running that is not compatible with the same GPL license
+    Linux is released under. For this course, we will declare that our modules are
+    licensed under the GPL.</p>
+
+    <p>Insert the following metadata into your module's source, just above any
+    functions:</p>
+
+    <pre>
+    MODULE_LICENSE("GPL");
+    MODULE_AUTHOR("Your name here");
+    MODULE_DESCRIPTION("A simple hello world kernel module");
+    </pre>
+
+    <h3 id="anatomy-includes">Includes</h3>
+
+    <p>Since we have called quite a few functions and macros, and used some
+    preprocessor definitions, we need to tell the compiler where to find the
+    definitions. For our hello world program, we need 3 includes:</p>
+
+    <ul>
+        <li><tt>#include &lt;linux/module.h&gt;</tt> &mdash; required by
+        every kernel module and should be first in the includes list</li>
+        <li><tt>#include &lt;linux/kernel.h&gt;</tt> &mdash; this gives us the
+        definitions for <tt>KERN_INFO</tt> and <tt>printk()</tt></li>
+        <li><tt>#include &lt;linux/init.h&gt;</tt> &mdash; defines the <tt>__init</tt>
+        and <tt>__exit</tt> keywords</li>
+    </ul>
+
+    <p>Place these at the very top of the source file.</p>
+
+    <hr />
+    <h2 id="building">Building a kernel module</h2>
+
+    <p>Now that we have written the kernel module, we need a way of compiling it
+    ready for the kernel to load. The kernel's build system can take care of this
+    for the most part, but we still need to set up our own Makefile so make can
+    create the module.</p>
+
+    <pre>
+    OBJ=helloworld.o
+
+    obj-m += $(OBJ)
+    MOD_DIR=/lib/modules/$(shell uname -r)/build
+
+    .PHONY: all
+    all:
+        make -C $(MOD_DIR) M=$(PWD) modules
+
+    .PHONY: clean
+    clean:
+        make -C $(MOD_DIR) M=$(PWD) clean
+    </pre>
+
+    <p>Try and understand what the Makefile above does (hint: try looking at the
+    manpage for <tt>make(1)</tt>) and explain it to your tutor to show you
+    understand how it works.</p>
+
+    <hr />
+    <h2 id="running">Loading and unloading</h2>
+
+    <h3 id="running-loading">Loading &mdash; <tt>insmod</tt></h3>
+
+    <p>To insert a module into the kernel, we use a program called <tt>insmod</tt>,
+    like so:</p>
+
+    <pre>sudo insmod hello.ko</pre>
+
+    <p>If the module was loaded successfully, <tt>insmod</tt> returns status 0.
+    Have a look at dmesg to see the module's init function printing hello world.</p>
+
+    <h3 id="running-listing">Listing &mdash; <tt>lsmod</tt></h3>
+
+    <p>Sometimes it is useful to see if a kernel module is currently loaded, and how
+    much space the code is taking up in the kernel. To do this, we use a program
+    called <tt>lsmod</tt> without any arguments. Go ahead and type it now, you should
+    see your module in the (possibly quite long) list.</p>
+
+    <h3 id="running-unloading">Unloading &mdash; <tt>rmmod</tt></h3>
+
+    <p>To unload a module when we are finished with it (or we have rebuilt it and wish to 
+    reload it), type:</p>
+
+    <pre>sudo rmmod hello.ko</pre>
+
+    <p>Unloading a module is not guaranteed to work, as the kernel will not allow a
+    module to be unloaded if other modules or user-space programs are using it. More
+    details on this will be provided in the next practical.</p>
+
+    <hr />
+
+    <h2>Next steps</h2>
+    <p>This practical was an abridged version of the <a
+        href="http://lwn.net/images/pdf/LDD3/ch02.pdf">LDD3 chapter 2: Building
+        and Running Modules</a>. Please work your way through this chapter now
+    as it contains invaluable information that you will use for assignments 2
+    and 3.</p>
+</body>
+</html>

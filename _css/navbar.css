@@ -1,0 +1,56 @@
+/* hacked up from help.eait to give pretty 'On this site' navbar - thanks dlg */
+
+#eait-nav {
+    float: right !important;
+    height: auto;
+    display: inline !important;
+    clear: none;
+    width: 227px;
+    margin: 12px 12px 0 0;
+    padding: 0;
+}
+
+#eait-nav h1 {
+    margin: 0px;
+    padding: 0;
+    background: transparent url('http://student.eait.uq.edu.au/template/images/nav_menu_title.gif') no-repeat scroll 0pt 0pt !important;
+    overflow: hidden; text-indent: -1000px;
+    width: 227px;
+    height: 35px;
+}
+
+#eait-nav ul, #eait-nav li {
+    border: 0px;
+    margin: 0px;
+    padding: 0px;
+}
+#eait-nav ul {
+    background-color: black;
+}
+#eait-nav li {
+    background: #f4f4f4 url('http://student.eait.uq.edu.au/template/images/accordion_headerbg_off.gif') repeat-x scroll 0pt bottom;
+    list-style: none;
+    width: 227px;
+    height: 28px;
+}
+#eait-nav a {
+    color: rgb(255, 255, 255);
+    display: block;
+    font-weight: bold;
+    text-align: left;
+    vertical-align: middle;
+
+    text-decoration: none;
+    color: rgb(59, 57, 42);
+    letter-spacing: normal;
+    font-size: 11px;
+    line-height:14px;
+    padding:7px 0 7px 10px;
+    text-transform: uppercase;
+    cursor: pointer;
+    font-family: Arial,sans-serif;
+}
+#eait-nav a:hover {
+    text-decoration: underline;
+    color: #9312AA;
+}

@@ -1,0 +1,148 @@
+<html>
+<head>
+    <title>COMP3301/7308 File systems</title>
+    <style type="text/css">
+        @import url('../_css/override.css');
+        @import url('../_css/navbar.css');
+    </style>
+</head>
+
+<body>
+    <h2>File systems</h2>
+    <p>The goal of this practical is for you to clone <em>ext2</em>, an existing
+    (and widely used) file system for Linux and make some small modifications to
+    it. Your cloned file system will be named <em>ext3301</em> and you will be
+    using it extensively for assignment 3.
+
+    <p><strong>Please note</strong> it is <em>strongly recommended</em> that you do all kernel development
+    on the virtual image (we recommend ssh'ing in using <tt>ssh(1)</tt> or Putty on Windows) as it
+    is very easy to crash the kernel you are working on while doing development. It is possible you
+    may lose data if you work on a physical Linux machine and crash its kernel.</p>
+
+    <hr />
+    <h3>Preparing the system</h3>
+
+    <p>Like many other kernel subsystems, file systems are written as kernel modules and can
+    either be compiled in to the kernel, or loaded at runtime. We will be using the latter
+    method for this prac (and A3).</p>
+
+    <p>Before making a copy of the <em>ext2</em> source tree, you need to install the
+    kernel sources (the virtual image only contains the headers, which lacks the C files
+    we need). Since the kernel tree is quite large (approximately 65 MB compressed), you
+    should ensure your apt mirror is set to the AARNet mirror, which is quota-free from
+    the ITEE network. The apt mirror is used whenever the system needs to download a package
+    before installing it.</p>
+
+    <h4>Change apt mirror to AARNet</h4>
+
+    <p>To do this, you need to edit <em>/etc/apt/sources.list</em> and set the URLs
+    to point to <tt>http://mirror.aarnet.edu.au/pub/ubuntu/archive</tt>. This file
+    is created by the default system install and is very verbose, containing a lot
+    of settings that we don't need, so we will just override the file. Remove the
+    file, and recreate it with the following lines only:</p>
+
+    <pre>deb http://mirror.aarnet.edu.au/pub/ubuntu/archive lucid main universe
+    deb http://mirror.aarnet.edu.au/pub/ubuntu/archive lucid-updates main universe
+    deb http://mirror.aarnet.edu.au/pub/ubuntu/archive lucid-security main universe
+    </pre>
+
+    <p>Now update your package lists off the AARNet mirror by typing <tt>apt-get update</tt>. 
+    When this is finished successfully your terminal will say &ldquo;<tt>Reading package lists... Done</tt>&rdquo;.
+    <strong>If you do not see that message, stop now and seek assistance from the tutor or newsgroups!</strong></p>
+
+    <p><strong>Be aware that if your apt mirror is not set to the AARNet mirror, the download
+        will be counted toward your UQ download quota (if downloading on the ITEE lab computers or UQconnect wireless).
+        You have been warned!</strong></p>
+
+    <h4>Installing the kernel source</h4>
+
+    <p>You can now install the kernel source tree by typing: <tt>apt-get install linux-source</tt>. 
+    Note that this only downloads the source, so we now have to extract it. The
+    source tree is quite large when uncompressed, so you should make sure you have
+    at least 500 MB free space on the virtual image before continuing.</p>
+
+    <p>Enter into the <em>/usr/src</em> directory and type: <tt>tar -xjf linux-source*.tar.bz2</tt>.</p>
+
+    <h3>Cloning the ext2 file system</h3>
+
+    <p>You can now gab the <em>ext2</em>
+    source code by typing: <tt>cp -rp /usr/src/linux-source-2.6.32/fs/ext2 ext3301</tt> 
+    (you will want to do this inside your home directory, probably in an SVN working copy). 
+    If this fails with &ldquo;No such file or directory&rdquo;, you probably don't
+    have the kernel source tree installed - go back and check to make sure it was
+    installed properly.</p>
+
+    <p>Next we must modify the <em>Makefile</em> to build the file system as a
+    kernel module, as by default Linux file system drivers are set to build into the
+    kernel itself. <a href="../resources/files/ext3301-Makefile-prac.patch">Download the patch</a> for the
+    <tt>Makefile</tt> and apply it. (Hint: <tt>patch(1)</tt> might be useful here!)</p>
+
+    <p>Now you can build the kernel module just as you've done in previous pracs - type <tt>make</tt> and
+    the kernel's build system will take care of the rest. You should now see a <em>ext3301.ko</em>
+    file in your working directory. Try loading this module into the kernel with <tt>insmod</tt>.
+    Did it succeed? It shouldn't have!</p>
+
+    <p>The reason loading the module failed was because the module attempted to register itself
+    as a file system driver called <em>ext2</em> - a name that the kernel already knows about! The
+    kernel will only allow one file system of a given name to be loaded at any given time. To
+    fix this, we need to rename our file system to <em>ext3301</em>. Scroll down the bottom of
+    <em>super.c</em> and you should see the <tt>init_ext2_fs()</tt> function, which takes the
+    form of the module's init function. Find the structure it registers and change the <tt>name</tt>
+    member to <em>ext3301</em>. The kernel will now see this as a new file system that can be
+    loaded into the kernel (although at this point it just operates exactly as <em>ext2</em>
+    does.</p>
+
+    <p>Now type <tt>make</tt> again and try to load the module. Does it work?</p>
+
+    <hr />
+    <h3>Creating an <em>ext3301</em> file system</h3>
+
+    <p>Now that the kernel knows about the new file system, we have to create a new 
+    image file and format it with an <em>ext3301</em> file system. Since we haven't modified 
+    the inode structure, we can use the original <em>ext2</em> formatting tool to create
+    this image.</p>
+
+    <p>First, create an empty image file ready to format:</p>
+    <p><tt>dd if=/dev/zero of=500K.img bs=500K count=0 seek=1</tt></p>
+
+    <p>This copies 500 KB of data from <tt>/dev/zero</tt> (so, nothing!) to a file called
+    <tt>500K.img</tt>. Notice that we gave the count as 0? This tells <tt>dd</tt> to create
+    what is called a <a href="http://en.wikipedia.org/wiki/Sparse_file">sparse file</a>, a
+    file that when empty takes up very little space on disk. Compare the output of <tt>ls -hl 500K.img</tt>
+    and <tt>du -h 500K.img</tt> for this file and you will see that it takes up less space than 500 KB.</p>
+
+    <p>Now, format the file system (remember that although our file system differs from
+    <em>ext2</em> the inode structure remains the same so we can mount <em>ext2</em>-formatted
+    file systems with our driver):</p>
+    <p><tt>mke2fs 500K.img</tt></p>
+
+    <hr />
+    <h3>Mounting the file system</h3>
+
+    <p>Create a mountpoint under the existing file system (do this once only): <tt>mkdir -p /mnt/ext3301</tt>.</p>
+
+    <p>Since Linux can only mount block devices as file systems, we must turn our image
+    into a psuedo block device. This is known as a <a href="http://en.wikipedia.org/wiki/Loop_device">loop device</a>. Luckily,
+    the kernel can do this for us automatically when mounting:</p>
+
+    <p><tt>mount -t ext3301 -o loop 500K.img /mnt/ext3301</tt></p>
+
+    <p>Note that we specified <tt>-t ext3301</tt> - this is the file system type and it tells
+    the kernel to use your file system driver when accessing this mountpoint (if you omit it the
+    kernel will probably autoselect the driver for <em>ext2</em> which we don't want). The <tt>-o loop</tt>
+    mount option tells the kernel that we are mounting something that isn't a block device and it should
+    set up a loop mount.</p>
+
+    <p>Try creating a new file and directory in the file system under <em>/mnt/ext3301</em>.</p>
+
+    <p>When you have finished with the file system (or wish to reload your driver), you must
+    unmount the loop device with <tt>umount /mnt/ext3301</tt>.</p>
+
+    <hr />
+
+    <p>You are now ready to start working on assignment 3 when it is released. We <strong>strongly recommend</strong>
+    reading up on the internals of <em>ext2</em> now: it will be invaluable when you start assignment 3.</p>
+
+    <p>A good document on <em>ext2</em> is located in the kernel source documentation: under <a href="http://www.kernel.org/doc/Documentation/filesystems/ext2.txt">Documentation/filesystems/ext2.txt</a>.</p>
+</body>
+</html>

@@ -1,0 +1,160 @@
+<html>
+<head>
+    <title>COMP3301/7308 Resources</title>
+    <style type="text/css">
+        @import url('../_css/stretch_content.css');
+        @import url('../_css/override.css');
+        @import url('../_css/navbar.css');
+        table#resources {
+            width: 100%;
+        }
+        table#resources th, table#resources td {
+            border: 1px solid #CCCCCC;
+        }
+        table th, td.name {
+            font-weight: bold;
+            text-align: center;
+            vertical-align: middle;
+        }
+        table#resources h3 {
+            margin: 0;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+    <h2>Resources</h2>
+    <p>The following software and links are provided to assist you with this course. Some software is hosted
+    locally on EAIT's network to save you download bandwidth. More material will be made available here as
+    the semester progresses.</p>
+
+    <table id="resources">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Link</th>
+                <th>Description</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td colspan="3"><h3>Virtual machine</h3></td>
+            </tr>
+            <tr>
+                <td class="name"><p>Ubuntu virtual machine image</p></td>
+                <td>
+                    <p><em>On-campus EAIT network:</em> <a href="file://M:\courses\COMP3301\COMP3301-VM.zip">COMP3301-VM.zip</a><br />(only accessible from the on-campus EAIT labs network), or:</p>
+                    <p><em>Download from home via SCP:</em> <a href="image_via_scp.html">view instructions</a><br />(works from any Internet-connected computer)</p>
+                </td>
+                <td>
+                    <p>Ubuntu Server 10.04 pre-installed VM image (for VMWare player).</p>
+                    <p>This will be the platform for assignments 2 and 3 and
+                    associated practicals.  Please install it onto your own
+                    laptop, USB HDD or USB flash disk (least preferred, as
+                    performance
+                    may be poor). The minimum size required is 2 GB.</p>
+                    <p><strong>Do not</strong> copy this VM image onto any of
+                    your EAIT labs network drives (such as H:), as you will get
+                    a nastygram from the helpdesk and they may delete it
+                    without notice. You have been warned!</p>
+                    <p><strong>Ubuntu VM login:</strong> username: <em>comp3301</em>, password: <em>comp3301</em></p>
+                    <p><strong>Network problems:</strong> if you have problems getting the network working from
+                    within the virtual machine, <a href="http://stackoverflow.com/a/296274/204281">follow step 2 of this answer</a> (ignore steps 1 and 3).</p>
+                    <p><strong>Please do not update any software (especially the kernel) or you may lose marks.</strong></p>
+                    <p><strong>Size:</strong> compressed image is 484 MB and will expand to around 2 GB when full.</p>
+                </td>
+            </tr>
+            <tr>
+                <td class="name"><p>VMware player</p></td>
+                <td><p><a href="http://www.vmware.com/support/product-support/player/">VMware downloads page</a></p></td>
+                <td>
+                    <p>Install this to boot and run the virtual image (above). You will need to register and click through the site to get to the download.<p>
+                    <p>Please note that all EAIT lab machines have this software pre-installed.</p>
+                    <p><strong>Size:</strong> the installer is 105 MB to download.</p>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="3"><h3 id="a1">Relating to assignment 1</h3></td>
+            </tr>
+            <tr>
+                <td class="name"><p>The Problem with Threads, Edward A. Lee, Berkeley</p></td>
+                <td>
+                   <p><a href="http://www.eecs.berkeley.edu/Pubs/TechRpts/2006/EECS-2006-1.pdf">eecs.berkeley.edu/.../EECS-2006-1.pdf</a></p>
+                </td>
+                <td>
+                    <p>An argument against threads as a concurrent programming model.</p>
+                    <p><strong>Size:</strong> 200 KB</p>
+                </td>
+            </tr>
+            <tr>
+                <td class="name"><p>Pth 2.0.7 library (with preemption patch)</p></td>
+                <td>
+                    <p><a href="files/pth-2.0.7-preempt.tar.gz">pth-2.0.7-preempt.tar.gz</a></p>
+                </td>
+                <td>
+                    <p>User-space threading library that you will be modifying in assignment 1. <em>Do not download from any other source, as it will not include the preemption patch that is required for this course.</em></p>
+                    <p><strong>Size:</strong> 660 KB</p>
+                </td>
+            </tr>
+            <tr>
+                <td class="name"><p>Pth build script (v1.7)</p></td>
+                <td>
+                   <p><a href="files/build-pth.sh">build-pth.sh</a></p>
+                </td>
+                <td>
+                    <p>Build script for the Pth library (above). This will be used to build your solution while marking.</p>
+                    <p><strong>Size:</strong> 3 KB</p>
+                </td>
+            </tr>
+
+            <tr>
+                <td colspan="3" id="a23"><h3>Relating to assignments 2 and 3</h3></td>
+            </tr>
+            <tr>
+                <td class="name"><p>Linux Device Drivers, 3rd edition</p></td>
+                <td><p><a href="http://lwn.net/Kernel/LDD3/">lwn.net/Kernel/LDD3</a></p></td>
+                <td>
+                    <p>An excellent guide to Linux device drivers, which is useful in assignments 2 and 3.</p>
+                    <ul>
+                        <li><a href="http://lwn.net/images/pdf/LDD3/ch02.pdf">ch 2: Building and Running Modules</a> - 646 KB</li>
+                        <li><a href="http://lwn.net/images/pdf/LDD3/ch03.pdf">ch 3: Char Drivers</a> (intro, registering, primitives) - 730 KB</li>
+                        <li><a href="http://lwn.net/images/pdf/LDD3/ch06.pdf">ch 6: Advanced Char Driver Operations</a> (<tt>ioctl</tt>) - 880 KB</li>
+                        <li><a href="http://lwn.net/images/pdf/LDD3/ch15.pdf">ch 15: Memory Mapping and DMA</a> - 900 KB</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td class="name"><p>LXR (Linux Cross-Reference)</p></td>
+                <td><p><a href="http://lxr.linux.no/linux+v2.6.32.16/">lxr.linux.no/linux+v2.6.32.16</a></p></td>
+                <td>
+                    <p>Linux cross-reference for the 2.6.32.16 kernel we use in the virtual image.</p>
+                </td>
+            </tr>
+            <tr>
+                <td class="name"><p>Kernel linked list info</p></td>
+                <td><p><em>Links to the right</em></p></td>
+                <td>
+                    <p>Useful references on how to use the kernel's doubly linked list data structure.</p>
+                    <ul>
+                        <li><a href="http://isis.poly.edu/kulesh/stuff/src/klist/">Linux Kernel Linked List Explained</a></li>
+                        <li><a href="http://kernelnewbies.org/FAQ/LinkedLists">Kernel Newbies - Linked Lists</a></li>
+                        <li><a href="http://lxr.linux.no/#linux+v2.6.32.21/include/linux/list.h"><tt>include/linux/list.h</tt> (LXR)</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td class="name"><p>checkpatch</p></td>
+                <td><p><a href="files/checkpatch-0.32.pl">checkpatch-0.32.pl</a></p></td>
+                <td>
+                    <p>Perl script to check Linux source code for coding style violations (<a href="http://git.kernel.org/?p=linux/kernel/git/torvalds/linux-2.6.git;a=blob;f=scripts/checkpatch.pl">mirrored from kernel.org</a>). This is the version used in assignment marking.</p>
+                    <p><strong>Size:</strong> 95 KB</p>
+                </td>
+            </tr>
+
+        </tbody>
+    </table>
+
+</body>
+</html>

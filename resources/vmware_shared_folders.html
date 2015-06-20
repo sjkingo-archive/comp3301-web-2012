@@ -1,0 +1,55 @@
+<html>
+<head>
+    <title>COMP3301/7308 Using VMware shared folders</title>
+    <style type="text/css">
+        @import url('../_css/override.css');
+        @import url('../_css/navbar.css');
+    </style>
+</head>
+
+<body>
+    <h2>Using VMware shared folders</h2>
+
+    <p>
+        <em>Idea contributed by Ivan. Comments/bugs to <a href="mailto:s.kingston@uq.edu.au">Sam Kingston</a>.</em>
+    </p>
+
+    <p>One way to access files on the host operating system from within the
+    virtual machine is to use VMware's Shared Folders.</p>
+
+    <p><strong>NOTE! There is an issue with stat()ing files on the hgfs file
+        system - directory entries appear as 0 bytes. When testing your A0
+        implementation, do not attempt to ls files/directories on the hgfs file
+        system or you will get incorrect sizes and may think your program is
+        not working correctly.</strong></p>
+
+    <p>First we need to shut down the VM guest and change some of its settings:</p>
+    <ol>
+        <li>Click: VM -> Settings -> Options -> Shared Folders. Add the folders you want to shared here.</li>
+        <li>Click: VM -> Settings -> Add -> CD/DVD Drive -> Use physical drive -> Select auto detect and connect at power on.</li>
+    </ol>
+
+    <p>Now install the VMware tools, which provides kernel support for interfacing with VMware from within a Linux guest:</p>
+
+    <ol>
+        <li>Start the virtual machine</li>
+        <li>Get the latest version of the tools ISO: Click VM -> Install VMware tools -> Download</li>
+        <li>Log in to a terminal in the VM and type the following commands:</li>
+        <li><tt>cd</tt></li>
+        <li><tt>sudo mkdir /mnt/cdrom</tt></li>
+        <li><tt>sudo mount /dev/cdrom1 /mnt/cdrom</tt></li>
+        <li><tt>tar -xf /mnt/cdrom/*.tar.gz</tt></li>
+        <li><tt>cd vmware-tools-distrib</tt></li>
+        <li><tt>sudo ./vmware-install.pl</tt><br />
+            Accept all default questions by pressing [Enter]. When the script asks if
+            you want it to run the initialisation script, say yes and let it build the
+            kernel modules. Say no when the script asks if you want to install the
+            vmsync feature.
+        </li>
+        <li><tt>sudo reboot</tt></li>
+    </ol>
+
+    <p>You may now remove the vmware-tools-distrib directory. The shared folders will
+    be available in <em>/mnt/hgfs</em>.</p>
+
+</body>

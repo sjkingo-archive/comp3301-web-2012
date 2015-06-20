@@ -1,0 +1,23 @@
+{
+    "netacl": [ [ "allow", "*" ] ],
+    "links": [
+        { 
+            "name": "Course Profile - COMP3301",
+            "href": "http://study.itee.uq.edu.au/profiles/2012_2_COMP3301_StLucia",
+            "priority": 1
+        },
+        { 
+            "name": "Course Profile - COMP7308",
+            "href": "http://study.itee.uq.edu.au/profiles/2012_2_COMP7308_StLucia",
+            "priority": 2
+        },
+        {
+            "name": "Lab status (EAIT login required)",
+            "href": "http://student.eait.uq.edu.au/labs/locations/?b=78&f=1#uqlsm"
+        },
+        {
+            "name": "Lectures and Tutorials",
+            "href": "https://blackboard.elearning.uq.edu.au/webapps/blackboard/content/listContentEditable.jsp?content_id=_2059641_1&course_id=_141806_1&mode=reset&courseTocLabel=Learning+Resources"
+        }
+     ]
+}

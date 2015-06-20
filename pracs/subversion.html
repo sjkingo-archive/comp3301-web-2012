@@ -1,0 +1,59 @@
+<html>
+<head>
+    <title>COMP3301/7308 Subversion cheat sheet</title>
+    <style type="text/css">
+        @import url('../_css/override.css');
+        @import url('../_css/navbar.css');
+    </style>
+</head>
+
+<body>
+    <h2>Subversion cheat sheet</h2>
+
+    <p>This is a cheat sheet of Subversion commands. For more information, you should
+    refer to <a href="http://student.eait.uq.edu.au/software/subversion/">EAIT's Subversion guide</a>.</p>
+
+    <hr />
+
+    <h3>Checkout a working copy</h3>
+    <p>For undergradates (enrolled in COMP3301):</p>
+    <p><code>svn checkout https://svn.itee.uq.edu.au/repo/comp3301-s4123456 comp3301</code></p>
+    <p>For postgraduates (enrolled in COMP7308):</p>
+    <p><code>svn checkout https://svn.itee.uq.edu.au/repo/comp7308-s4123456 comp7308</code></p>
+    <p>(<em>where</em> <tt>s4123456</tt> <em>is your student number</em>)</p>
+    <p>You will be prompted to enter your username and password. Ensure your
+    username is in the form of <tt>s4123456@student.uq.edu.au</tt> or
+    authentication will fail.</p>
+    <hr />
+
+    <p>The following commands should all be run from within your working copy.</p>
+
+    <h3>Update to the latest revision</h3>
+    <p><code>svn update</code></p>
+    <hr />
+
+    <h3>Add a untracked file (once per file only)</h3>
+    <p><code>svn add file1 [file2 ...]</code></p>
+    <p><em>Don't forget to commit the changes.</em></p>
+    <hr />
+
+    <h3>Remove a tracked file</h3>
+    <p><code>svn del file1 [file2 ...]</code></p>
+    <p><em>Don't forget to commit the changes.</em></p>
+    <hr />
+
+    <h3>Create a tracked directory</h3>
+    <p>You will need to use this command to create the subdirectories for each assignment.</p>
+    <p><code>svn mkdir dir</code></p>
+    <p><em>Don't forget to commit the changes.</em></p>
+    <hr />
+
+    <h3>Commit changes made to tracked files</h3>
+    <p>To commit any changes to <em>all</em> tracked files:</p>
+    <p><code>svn commit -m "this is a message, you should write something meaningful here"</code></p>
+    <p>To commit changes to specific tracked files:</p>
+    <p><code>svn commit -m "this is a message, you should write something meaningful here" file1 [file2 ...]</code></p>
+    <hr />
+
+</body>
+</html>
